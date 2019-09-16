@@ -77,6 +77,40 @@ CURLcode Curl_setstropt(char **charp, const char *s)
   return CURLE_OK;
 }
 
+CURLcode Curl_setblobopt(struct curl_blob **blobp,
+                         const struct curl_blob *st_blob)
+{
+  /* Release the previous storage at `charp' and replace by a dynamic storage
+     copy of `sblob'.
+     Return CURLE_OK, CURLE_BAD_FUNCTION_ARGUMENT or CURLE_OUT_OF_MEMORY. */
+
+  Curl_safefree(*blobp);
+
+  if(st_blob) {
+    /* sblob contain struct curl_blob data */
+
+    bool dup = (st_blob->flags) & CURL_BLOB_DUPFLAG_COPYMASK;
+    struct curl_blob* st_blob_dup;
+    st_blob_dup = (struct curl_blob*)malloc(sizeof(struct curl_blob) +
+                                            (dup ? st_blob->len : 0));
+    if(!st_blob_dup)
+        return CURLE_OUT_OF_MEMORY;
+    *st_blob_dup = *st_blob;
+    if(dup) {
+        /* dupflag is set by on blob. We need copy the data,
+        *   app don't need keep data pointer valid after setopt */
+        st_blob_dup->data = (void *)(((char *)st_blob_dup) +
+                                sizeof(struct curl_blob));
+        memcpy(st_blob_dup->data, st_blob->data, st_blob->len);
+    }
+
+    *blobp = st_blob_dup;
+    return CURLE_OK;
+  }
+
+  return CURLE_OK;
+}
+
 static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 {
   CURLcode result = CURLE_OK;
@@ -1606,6 +1640,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_CERT_ORIG],
                             va_arg(param, char *));
     break;
+  case CURLOPT_SSLCERT_BLOB:
+    /*
+     * String that holds file name of the SSL certificate to use
+     */
+    result = Curl_setblobopt(&data->set.blobs[BLOB_CERT_ORIG],
+                             va_arg(param, struct curl_blob*));
+    break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLCERT:
     /*
@@ -1637,6 +1678,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     result = Curl_setstropt(&data->set.str[STRING_KEY_ORIG],
                             va_arg(param, char *));
+    break;
+  case CURLOPT_SSLKEY_BLOB:
+    /*
+     * String that holds file name of the SSL certificate to use
+     */
+    result = Curl_setblobopt(&data->set.blobs[BLOB_KEY_ORIG],
+                             va_arg(param, struct curl_blob*));
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLKEY:

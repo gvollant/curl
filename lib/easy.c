@@ -763,6 +763,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 {
   CURLcode result = CURLE_OK;
   enum dupstring i;
+  enum dupblob j;
 
   /* Copy src->set into dst->set first, then deal with the strings
      afterwards */
@@ -778,6 +779,18 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
     if(result)
       return result;
   }
+
+
+  /* clear all blob pointers first */
+  memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
+  /* duplicate all blobs */
+  for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
+    result = Curl_setblobopt(&dst->set.blobs[j], src->set.blobs[j]);
+    /* Curl_setstropt return CURLE_BAD_FUNCTION_ARGUMENT with blob */
+    if(result)
+      return result;
+  }
+
 
   /* duplicate memory areas pointed to */
   i = STRING_COPYPOSTFIELDS;

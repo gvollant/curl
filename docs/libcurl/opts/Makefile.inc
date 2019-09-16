@@ -313,10 +313,12 @@ man_MANS =                                      \
   CURLOPT_SSH_PRIVATE_KEYFILE.3                 \
   CURLOPT_SSH_PUBLIC_KEYFILE.3                  \
   CURLOPT_SSLCERT.3                             \
+  CURLOPT_SSLCERT_BLOB.3                        \
   CURLOPT_SSLCERTTYPE.3                         \
   CURLOPT_SSLENGINE.3                           \
   CURLOPT_SSLENGINE_DEFAULT.3                   \
   CURLOPT_SSLKEY.3                              \
+  CURLOPT_SSLKEY_BLOB.3                         \
   CURLOPT_SSLKEYTYPE.3                          \
   CURLOPT_SSLVERSION.3                          \
   CURLOPT_SSL_CIPHER_LIST.3                     \
