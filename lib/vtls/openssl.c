@@ -2825,7 +2825,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
      https://github.com/d3x0r/SACK/blob/master/src/netlib/ssl_layer.c#L1037
      https://tools.ietf.org/html/rfc5280 */
   if((SSL_CONN_CONFIG(verifypeer) || SSL_CONN_CONFIG(verifyhost)) &&
-     (SSL_SET_OPTION(native_ca_store))) {
+     (SSL_SET_OPTION(native_ca_store)) && (!ssl_cafile) && (!ssl_capath)) {
     X509_STORE *store = SSL_CTX_get_cert_store(backend->ctx);
     HCERTSTORE hStore = CertOpenSystemStore((HCRYPTPROV_LEGACY)NULL,
                                             TEXT("ROOT"));
